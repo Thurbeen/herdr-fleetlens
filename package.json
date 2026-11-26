@@ -1,0 +1,14 @@
+{
+  "name": "herdr-fleetlens",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "lint": "biome check .",
+    "check-mod": "scripts/check-mod.sh"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9"
+  },
+  "license": "MIT"
+}

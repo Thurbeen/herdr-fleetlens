@@ -1,0 +1,225 @@
+[
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "mission-control",
+      "uid": "u100-aaaa",
+      "generation": 1,
+      "creationTimestamp": 1795000000000,
+      "labels": {}
+    },
+    "status": {
+      "phase": "Briefed",
+      "agentState": "working",
+      "session": {
+        "host": "local",
+        "id": "pfx.u100-aaaa",
+        "key": "mission-control.u100-aaaa"
+      },
+      "brief": {
+        "generation": 1
+      },
+      "conditions": [
+        {
+          "type": "Spawned",
+          "status": "True",
+          "reason": "Spawned"
+        }
+      ],
+      "sessionState": "Running"
+    }
+  },
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "layout-worker",
+      "uid": "u200-bbbb",
+      "generation": 2,
+      "creationTimestamp": 1795000200000,
+      "labels": {
+        "gateway.fleet.dev/parent": "mission-control",
+        "vega.fleet.dev/request": "custom herdr layout"
+      }
+    },
+    "status": {
+      "phase": "Briefed",
+      "agentState": "idle",
+      "session": {
+        "host": "herdr/local",
+        "id": "fleet.u200-bbbb"
+      },
+      "brief": {
+        "generation": 2
+      },
+      "declared": [
+        {
+          "kind": "Question",
+          "id": "q1",
+          "text": "Approve the design?\nD1 target\nD2 layout"
+        },
+        {
+          "kind": "Question",
+          "id": "q2",
+          "text": "Pick a name?"
+        }
+      ],
+      "answered": {
+        "q1": {
+          "at": 1795000300000,
+          "from": "cli/user"
+        }
+      }
+    },
+    "spec": {
+      "brief": "Build the layout.\nSecond line."
+    }
+  },
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "stuck-worker",
+      "uid": "u300-cccc",
+      "generation": 2,
+      "creationTimestamp": 1795000100000,
+      "labels": {
+        "gateway.fleet.dev/parent": "mission-control"
+      }
+    },
+    "status": {
+      "phase": "Briefed",
+      "agentState": "working",
+      "session": {
+        "host": "herdr/local",
+        "id": "fleet.u300-cccc"
+      },
+      "brief": {
+        "generation": 1
+      },
+      "declared": [
+        {
+          "kind": "ChangeRequest",
+          "name": "cr-1",
+          "url": "https://github.com/acme/app/pull/7"
+        }
+      ],
+      "conditions": [
+        {
+          "type": "NeedsAttention",
+          "status": "True",
+          "reason": "DeliveryUnconfirmed",
+          "message": "inbox entry could not be confirmed"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "busy-worker",
+      "uid": "u400-dddd",
+      "generation": 1,
+      "creationTimestamp": 1795000400000,
+      "labels": {
+        "gateway.fleet.dev/parent": "mission-control"
+      }
+    },
+    "status": {
+      "phase": "Briefed",
+      "agentState": "working",
+      "session": {
+        "host": "herdr/local",
+        "id": "fleet.u400-dddd"
+      },
+      "brief": {
+        "generation": 1
+      },
+      "sessionState": "Paused",
+      "conditions": [
+        {
+          "type": "Paused",
+          "status": "True",
+          "reason": "Idle",
+          "message": "Fleet paused the session while its agent was idle"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "shipped-worker",
+      "uid": "u500-eeee",
+      "generation": 2,
+      "creationTimestamp": 1795000050000,
+      "labels": {
+        "gateway.fleet.dev/parent": "mission-control"
+      }
+    },
+    "status": {
+      "phase": "Concluded",
+      "agentState": "idle",
+      "session": {
+        "host": "herdr/local",
+        "id": "fleet.u500-eeee"
+      },
+      "brief": {
+        "generation": 2
+      },
+      "declared": [
+        {
+          "kind": "Question",
+          "id": "q1",
+          "text": "Ship it?"
+        },
+        {
+          "kind": "ChangeRequest",
+          "name": "cr-2",
+          "url": "https://github.com/acme/app/pull/22"
+        }
+      ],
+      "answered": {
+        "q1": {
+          "at": 1795000060000,
+          "from": "cli/user"
+        }
+      },
+      "result": {
+        "generation": 2,
+        "outcome": "shipped",
+        "summary": "Draft PR #22 adds the installer.",
+        "artifacts": ["https://github.com/acme/app/pull/22"]
+      },
+      "sessionState": "Idle"
+    },
+    "spec": {
+      "configRef": {
+        "name": "default-claude"
+      },
+      "harness": "claude",
+      "env": {
+        "FLEET_CONFIG": "/x/config.toml"
+      }
+    }
+  },
+  {
+    "kind": "Task",
+    "metadata": {
+      "name": "orphan",
+      "uid": "u600-ffff",
+      "generation": 1,
+      "creationTimestamp": 1795000010000,
+      "labels": {
+        "gateway.fleet.dev/parent": "gone-parent"
+      }
+    },
+    "status": {
+      "phase": "Concluded",
+      "agentState": "idle",
+      "result": {
+        "generation": 1,
+        "outcome": "failed",
+        "summary": ""
+      }
+    }
+  }
+]
