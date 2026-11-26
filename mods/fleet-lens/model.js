@@ -81,7 +81,8 @@ export function isPaused(task) {
 }
 
 export function liveSessionTerminal(obj, terminals) {
-  const key = `fleet.${obj.metadata?.uid}`;
+  const key = obj.status?.session?.id;
+  if (!key) return null;
   const live = (terminals ?? []).find(
     (t) => t.labels?.[SESSION_LABEL] === key && t.state === "live",
   );
@@ -89,7 +90,8 @@ export function liveSessionTerminal(obj, terminals) {
 }
 
 export function sessionTerminal(obj, terminals) {
-  const key = `fleet.${obj.metadata?.uid}`;
+  const key = obj.status?.session?.id;
+  if (!key) return null;
   const matches = (terminals ?? []).filter((t) => t.labels?.[SESSION_LABEL] === key);
   const chosen = matches.find((t) => t.state === "live") ?? matches[0];
   return chosen ? { address: chosen.address, status: chosen.status } : null;
@@ -140,7 +142,7 @@ function generationCell(obj) {
 }
 
 function herdrCell(obj, terminal) {
-  if (terminal) return c(terminal.status, LIVE_TONE[terminal.status] ?? null);
+  if (terminal?.status) return c(terminal.status, LIVE_TONE[terminal.status] ?? null);
   return isPaused(obj) ? c("paused", "muted") : c("-");
 }
 

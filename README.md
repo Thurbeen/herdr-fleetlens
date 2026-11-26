@@ -2,6 +2,10 @@
 
 **Fleet Lens** for the [Herdr app](https://herdr.dev): a keyboard-first float that browses every Fleet resource kind, in the spirit of [thurbox-fleetlens](https://github.com/Thurbeen/thurbox-fleetlens), with Herdr's live sessions on top.
 
+![Fleet Lens: a request typed into VEGA becomes three worker Tasks in herdr; the Lens lists them under VEGA, the one asking a Question first; Fleet pauses the idle sessions and w wakes one](https://github.com/Thurbeen/herdr-fleetlens/releases/download/media/fleet-lens.gif)
+
+The clip is a real run, recorded by `demo/record.sh` in a sandbox: a request is typed into [VEGA](https://github.com/Thurbeen/vega), which applies one worker Task per repository, run by logged-in `claude` agents in herdr. The Lens then shows them, Fleet idle-pauses them, and `w` wakes one. The working stretches are sped up. The [video](https://github.com/Thurbeen/herdr-fleetlens/releases/download/media/fleet-lens.mp4) is the same take, sharper.
+
 Fleet's `herdr/local` runtime runs each Task as a herdr-core terminal labelled `fleet.key=fleet.<uid>`. The Lens joins on that label, so every Task row shows its live Herdr status, and `s` jumps straight to its session.
 
 ## Fleet Sessions sidebar
@@ -19,7 +23,7 @@ Clicking a session goes to it:
 
 - A live herdr session is focused.
 - A paused session is woken through `fleet attach --wake`. Its new terminal is focused once Herdr sees it.
-- A runtime-mux session (badge `mux`) can be woken, but it isn't shown inside Herdr. Its `fleet attach` stream speaks runtime-mux's framed viewer protocol (what thurbox consumes), not a raw terminal. The only other route would be attaching to runtime-mux's private tmux windows on the live thurbox server. Open live mux sessions in thurbox.
+- A runtime-mux session (badge `mux`, on a `mux/…` host) can be woken, but it isn't shown inside Herdr. Its `fleet attach` stream speaks runtime-mux's framed viewer protocol (what thurbox consumes), not a raw terminal. The only other route would be attaching to runtime-mux's private tmux windows on the live thurbox server. Open live mux sessions in thurbox.
 
 The Lens offers the same actions: `s` goes to the session, `w` wakes it, and the preview button follows whichever applies.
 
@@ -80,6 +84,8 @@ The rail lists Fleet's core kinds (`fleet version --json`), then every kind a pl
 
 The Lens reads Fleet only through `fleet version`, `fleet list plugins`, `fleet list <kind>` and `fleet attach --wake` (the one write, used to wake a session).
 
+Every action is also an app command, `fleet-lens.<action>`, which `keys.json` can bind or `herdr-app do` can run while the Lens is open: `down`, `up`, `pageDown`, `pageUp`, `first`, `last`, `nextKind`, `prevKind`, `open`, `back`, `close`, `refresh`, `session`, `wake`, `openUrl`, `filter`.
+
 ## Develop
 
 ```sh
@@ -88,3 +94,5 @@ prek run --all-files
 ```
 
 `prek run` covers Biome, `node --test`, and `herdr-app check` against a temporary `HERDR_APP_HOME`.
+
+`demo/record.sh` re-records the clip into `media/`, which git ignores. The clip lives on the `media` prerelease instead, so recordings never enter the history: replace it with `gh release upload media media/fleet-lens.gif media/fleet-lens.mp4 --clobber`. `demo/encode.sh <take dir> media` re-encodes a take kept with `KEEP=1` without running the agents again. It needs Xvfb, ffmpeg, herdr-core, herdr-app, Fleet with `runtime-herdr`, and a logged-in `claude`: the agents do real work and spend real quota. It keeps apart from the machine's own Fleet and herdr through a scratch Fleet config and store, a herdr-core session and a herdr-app home of its own, and a private display, and it removes them on exit.

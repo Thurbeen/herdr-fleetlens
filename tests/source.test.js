@@ -11,6 +11,7 @@ import {
   readPluginKinds,
   storeWatchDir,
   VERSION,
+  withBin,
 } from "../mods/fleet-lens/source.js";
 
 const raw = readFileSync(new URL("./fixtures/tasks.json", import.meta.url), "utf8");
@@ -88,4 +89,13 @@ test("custom kinds come from the plugins fleet serves, after the core kinds", ()
     "Review",
     "Ticket",
   ]);
+});
+
+test("a configured fleet binary replaces fleet in every command", () => {
+  assert.deepEqual(withBin(listCommand("Task"), "/opt/fleet"), {
+    command: "/opt/fleet",
+    args: ["list", "Task", "--json"],
+  });
+  assert.deepEqual(withBin(VERSION, undefined), VERSION);
+  assert.deepEqual(withBin(PLUGINS, ""), PLUGINS);
 });

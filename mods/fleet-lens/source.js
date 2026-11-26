@@ -57,3 +57,7 @@ export function readPluginKinds(result) {
 export function mergeKinds(core, custom) {
   return [...new Set([...core, ...custom])];
 }
+
+export function withBin(command, bin) {
+  return bin ? { ...command, command: bin } : command;
+}

@@ -16,7 +16,7 @@ import {
   watchFolder,
   window,
 } from "herdr";
-import { actionFor } from "./keys.js";
+import { actionFor, commandAction } from "./keys.js";
 import {
   columns,
   filterRows,
@@ -27,7 +27,7 @@ import {
   rows,
   withSections,
 } from "./model.js";
-import { goPlan, hostKind, readStream, sessionGroups, wakeCommand } from "./sessions.js";
+import { goPlan, readStream, sessionGroups, wakeCommand } from "./sessions.js";
 import { sidebar } from "./sidebar.js";
 import {
   FALLBACK_REFRESH_MS,
@@ -41,6 +41,7 @@ import {
   storeWatchDir,
   UNWATCHED_REFRESH_MS,
   VERSION,
+  withBin,
 } from "./source.js";
 import {
   detail,
@@ -61,8 +62,6 @@ import { toYaml } from "./yaml.js";
 const PAGE = 10;
 const WAKE_TIMEOUT_MS = 180000;
 
-const execute = async ({ command, args }) => exec(command, args);
-
 export default class FleetLens extends View {
   init(_props, cx) {
     this.sessionsView = props()?.view === "sessions";
@@ -82,6 +81,7 @@ export default class FleetLens extends View {
     this.loading = true;
     this.watching = false;
     this.store = null;
+    this.bin = null;
     this.version = null;
     this.handle = cx.focus_handle();
     if (!this.sessionsView) this.handle.focus();
@@ -91,7 +91,9 @@ export default class FleetLens extends View {
     if (!this.sessionsView) cx.timer.after(150, () => this.handle.focus());
     this.listenForCommands(cx);
     cx.spawn(async (cx) => {
-      this.store = await this.readStore();
+      const config = await this.readConfig();
+      this.store = config.store ?? null;
+      this.bin = config.bin ?? null;
       await this.load();
       cx.notify();
       const dir = storeWatchDir(this.store);
@@ -106,19 +108,26 @@ export default class FleetLens extends View {
     this.watch?.cancel();
   }
 
-  async readStore() {
+  async readConfig() {
     try {
-      const text = await readTextFile(`${appHome()}/mods/fleet-lens/config.json`);
-      return JSON.parse(text).store ?? null;
+      return JSON.parse(await readTextFile(`${appHome()}/mods/fleet-lens/config.json`)) ?? {};
     } catch {
-      return null;
+      return {};
     }
+  }
+
+  execute(fleetCommand, options) {
+    const { command, args } = withBin(fleetCommand, this.bin);
+    return exec(command, args, options);
   }
 
   listenForCommands(cx) {
     cx.spawn(async (cx) => {
       for (;;) {
-        if ((await nextCommand()) === "focus") this.handle.focus();
+        const name = await nextCommand();
+        const action = commandAction(name);
+        if (name === "focus") this.handle.focus();
+        else if (action && !this.sessionsView) this.act(action, this.snapshot(), cx);
         cx.notify();
       }
     });
@@ -157,8 +166,8 @@ export default class FleetLens extends View {
     try {
       if (!this.sessionsView) {
         const [core, custom] = await Promise.all([
-          execute(VERSION).then(readKinds),
-          execute(PLUGINS).then(readPluginKinds),
+          this.execute(VERSION).then(readKinds),
+          this.execute(PLUGINS).then(readPluginKinds),
         ]);
         if (core.ok) this.version = core.version;
         else errors.push(core.error);
@@ -169,7 +178,7 @@ export default class FleetLens extends View {
         if (!this.kinds.some((k) => k.kind === this.kind)) this.showKind("Task");
       }
       const lists = await Promise.all(
-        this.kinds.map(async ({ kind }) => [kind, readList(await execute(listCommand(kind)))]),
+        this.kinds.map(async ({ kind }) => [kind, readList(await this.execute(listCommand(kind)))]),
       );
       for (const [kind, read] of lists) {
         if (read.ok) this.objects[kind] = read.objects;
@@ -268,10 +277,11 @@ export default class FleetLens extends View {
     cx.notify();
     cx.spawn(async (cx) => {
       try {
-        const { command, args } = wakeCommand(name);
-        const read = readStream(await exec(command, args, { timeout: WAKE_TIMEOUT_MS }));
+        const read = readStream(
+          await this.execute(wakeCommand(name), { timeout: WAKE_TIMEOUT_MS }),
+        );
         if (!read.ok) throw new Error(read.error);
-        if (hostKind(task) === "herdr") this.pending = { uid, task };
+        this.pending = { uid, task };
         notify({ title: `${name} is running again`, level: "success" });
       } catch (error) {
         notify({ title: `Could not wake ${name}`, body: error.message, level: "error" });

@@ -53,7 +53,7 @@ A keyboard-first float that browses every resource a [Fleet](https://github.com/
 - Each row shows:
   - A state mark: a dot coloured by Herdr status (working pulses), two 2×8px bars for paused, a braille spinner while waking.
   - The Task name; paused and stopped names are muted.
-  - Badges: `?`/`!`, the outcome for finished paused sessions, and `mux` for sessions on a non-herdr runtime.
+  - Badges: `?`/`!`, the outcome for finished paused sessions, and `mux` for sessions on a `mux/…` host. A Task on a plain `local` host counts as herdr when a herdr-core terminal carries its session id.
   - A "Wake" button on paused rows.
   - The row of the space you're in is highlighted.
 
@@ -99,8 +99,9 @@ A keyboard-first float that browses every resource a [Fleet](https://github.com/
   - Art: `thurbeen-mark.png` and `thurbeen-emblem.png`.
 - **`herdr` API:** `exec`, `terminals`, `focused`, `props`, `run` (`agent.focus`, `mod.open`), `closeOverlay`, `notify`, `watchFolder`, `readTextFile`, `appHome`, `window`, `theme`, `settings`, `nextCommand`, `checking`.
 - **Programs:** `fleet version --json`, `fleet list plugins --json`, `fleet list <kind> --json`, `fleet attach <task> --json --wake`, and `xdg-open` / `open` / `cmd /c start` for links.
-- **Join:** Fleet's herdr runtime labels each Task's terminal `fleet.key=fleet.<metadata.uid>`. A Task is paused when its `Paused` condition is True or its `sessionState` is `Paused`.
-- **Config:** `install.sh --store <data.dir>` writes `mods/fleet-lens/config.json` (`{"store": …}`) for the watch.
+- **Join:** Fleet's herdr runtime labels each Task's terminal `fleet.key=<status.session.id>` (the runtime's `keyPrefix`, then the uid), and `herdr.space` with the same value. Join on the session id, never on a hardcoded prefix. A Task is paused when its `Paused` condition is True or its `sessionState` is `Paused`.
+- **Config:** `install.sh --store <data.dir> --bin <fleet>` writes `mods/fleet-lens/config.json` (`{"store": …, "bin": …}`). `store` is what the mod watches. `bin` replaces `fleet` in every command.
+- **Commands:** `nextCommand()` maps `fleet-lens.<action>` to the same actions as the keys (`down`, `up`, `first`, `last`, `nextKind`, `prevKind`, `open`, `back`, `close`, `refresh`, `session`, `wake`, `openUrl`, `filter`). Only the Lens copy acts on them; the sidebar copy takes only `focus`. `demo/record.sh` drives the clip with them.
 
 ## Watch out
 

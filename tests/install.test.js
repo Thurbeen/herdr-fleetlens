@@ -61,6 +61,20 @@ test("the fleet layout swaps Herdr's agents list for Fleet sessions, keeping spa
   assert.equal(new Set(ids).size, ids.length);
 });
 
+test("install records a fleet binary when given one", () => {
+  const other = mkdtempSync(join(tmpdir(), "herdr-fleet-bin-"));
+  try {
+    const run = install("--home", other, "--bin", "/opt/fleet/bin/fleet");
+    assert.equal(run.status, 0, run.stderr);
+    const config = JSON.parse(
+      readFileSync(join(other, "mods", "fleet-lens", "config.json"), "utf8"),
+    );
+    assert.deepEqual(config, { bin: "/opt/fleet/bin/fleet" });
+  } finally {
+    rmSync(other, { recursive: true, force: true });
+  }
+});
+
 test("install refuses to run without --home", () => {
   const run = install();
   assert.notEqual(run.status, 0);
