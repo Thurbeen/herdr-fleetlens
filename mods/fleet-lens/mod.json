@@ -1,0 +1,14 @@
+{
+  "place": "none",
+  "title": "Fleet Lens",
+  "focusable": true,
+  "overlay": { "kind": "dialog", "width": 0.92, "height": 0.9 },
+  "palette": [
+    {
+      "title": "Fleet: open Lens",
+      "command": "mod.open",
+      "args": { "name": "fleet-lens" },
+      "words": "fleet tasks questions lens"
+    }
+  ]
+}

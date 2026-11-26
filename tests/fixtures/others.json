@@ -1,0 +1,49 @@
+{
+  "TaskConfig": [
+    {
+      "kind": "TaskConfig",
+      "metadata": {
+        "name": "default-claude",
+        "uid": "u700",
+        "generation": 3,
+        "creationTimestamp": 1795000000000
+      },
+      "spec": { "envFrom": [{ "name": "github-token" }, { "name": "" }] },
+      "status": {
+        "observedGeneration": 2,
+        "conditions": [
+          { "type": "Ready", "status": "True" },
+          { "type": "Valid", "status": "False" }
+        ]
+      }
+    }
+  ],
+  "ChangeRequest": [
+    {
+      "kind": "ChangeRequest",
+      "metadata": {
+        "name": "cr-2",
+        "uid": "u800",
+        "generation": 1,
+        "creationTimestamp": 1795000070000
+      },
+      "spec": { "url": "https://github.com/acme/app/pull/22" },
+      "status": {
+        "phase": "Settled",
+        "observedGeneration": 1,
+        "conditions": [{ "type": "Merged", "status": "True" }]
+      }
+    },
+    {
+      "kind": "ChangeRequest",
+      "metadata": {
+        "name": "cr-3",
+        "uid": "u801",
+        "generation": 1,
+        "creationTimestamp": 1795000080000
+      },
+      "spec": { "url": "https://gitlab.com/grp/sub/proj/-/merge_requests/3" },
+      "status": { "phase": "Open", "observedGeneration": 1, "conditions": [] }
+    }
+  ]
+}

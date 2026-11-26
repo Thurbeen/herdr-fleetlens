@@ -1,0 +1,27 @@
+[
+  {
+    "address": "t1",
+    "status": "working",
+    "state": "live",
+    "labels": { "fleet.key": "fleet.u100-aaaa" }
+  },
+  {
+    "address": "t2",
+    "status": "blocked",
+    "state": "live",
+    "labels": { "fleet.key": "fleet.u200-bbbb" }
+  },
+  {
+    "address": "t3",
+    "status": "done",
+    "state": "finished",
+    "labels": { "fleet.key": "fleet.u500-eeee" }
+  },
+  {
+    "address": "t4",
+    "status": "idle",
+    "state": "live",
+    "labels": { "fleet.key": "fleet.u500-eeee" }
+  },
+  { "address": "t9", "status": "idle", "state": "live", "labels": {} }
+]
