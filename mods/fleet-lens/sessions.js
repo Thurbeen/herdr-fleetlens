@@ -8,17 +8,19 @@ import {
 
 export { isPaused };
 
-export function hostKind(task) {
+export function hostKind(task, terminals) {
   const host = task.status?.session?.host ?? task.spec?.host ?? "local";
-  return host.startsWith("herdr/") ? "herdr" : "stream";
+  if (host.startsWith("herdr/")) return "herdr";
+  if (sessionTerminal(task, terminals)) return "herdr";
+  return host.startsWith("mux/") ? "mux" : "unknown";
 }
 
 export function goPlan(task, terminals) {
   if (!task.status?.session) return { action: "none" };
   if (isPaused(task)) return { action: "wake" };
-  if (hostKind(task) !== "herdr") return { action: "none" };
   const terminal = liveSessionTerminal(task, terminals);
-  return terminal ? { action: "focus", terminal } : { action: "wake" };
+  if (terminal) return { action: "focus", terminal };
+  return hostKind(task, terminals) === "herdr" ? { action: "wake" } : { action: "none" };
 }
 
 export const wakeCommand = (name) => ({
@@ -43,7 +45,7 @@ function sessionState(task, terminals, waking) {
   if (waking.has(task.metadata.uid)) return "waking";
   if (isPaused(task)) return "paused";
   if (!task.status?.session) return "stopped";
-  const terminal = hostKind(task) === "herdr" ? sessionTerminal(task, terminals) : null;
+  const terminal = sessionTerminal(task, terminals);
   return terminal?.status ?? task.status?.agentState ?? "unknown";
 }
 
@@ -72,7 +74,8 @@ function toItem(task, terminals, waking) {
     created: task.metadata.creationTimestamp ?? 0,
     marker,
     state: sessionState(task, terminals, waking),
-    kind: hostKind(task),
+    kind: hostKind(task, terminals),
+    space: task.status?.session?.id ?? null,
     outcome: task.status?.result?.outcome ?? null,
     plan: goPlan(task, terminals),
     task,

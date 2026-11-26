@@ -9,6 +9,7 @@ import {
   filterRows,
   glyphs,
   itemIndex,
+  liveSessionTerminal,
   needYou,
   openQuestions,
   preview,
@@ -237,4 +238,29 @@ test("a Task's routine conditions stay out of its preview", () => {
   open.status.conditions = [{ type: "Concluded", status: "False", reason: "NoResultYet" }];
   const [r] = rows("Task", [open], { now });
   assert.deepEqual(preview(r), []);
+});
+
+test("a session terminal that reports no status reads as no status", () => {
+  const silent = [
+    { address: "t5", status: null, state: "live", labels: { "fleet.key": "fleet.u100-aaaa" } },
+  ];
+  const [r] = rows("Task", [task("mission-control")], { now, terminals: silent });
+  assert.deepEqual(cell(r, "HERDR"), { text: "-", tone: null });
+  assert.doesNotThrow(() => r.cells.map((c) => c.text.length));
+});
+
+test("a Task joins its terminal by its session id, whatever the runtime's key prefix", () => {
+  const prefixed = structuredClone(task("mission-control"));
+  prefixed.status.session = { host: "herdr/local", id: "demo42.u100-aaaa" };
+  const labelled = [
+    {
+      address: "t9",
+      status: "working",
+      state: "live",
+      labels: { "fleet.key": "demo42.u100-aaaa" },
+    },
+  ];
+  const [r] = rows("Task", [prefixed], { now, terminals: labelled });
+  assert.equal(r.terminal, "t9");
+  assert.equal(liveSessionTerminal(prefixed, labelled), "t9");
 });

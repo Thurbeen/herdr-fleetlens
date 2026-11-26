@@ -24,6 +24,12 @@ const MODES = {
   detail: { ...SHARED, enter: "back", escape: "back", q: "back" },
 };
 
+const COMMANDS = new Set([...Object.values(MODES.list), ...Object.values(MODES.detail)]);
+
+export function commandAction(name) {
+  return COMMANDS.has(name) ? name : null;
+}
+
 export function actionFor(mode, keystroke) {
   return MODES[mode]?.[keystroke] ?? null;
 }

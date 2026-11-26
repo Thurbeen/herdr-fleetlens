@@ -42,8 +42,7 @@ const badge = (text, fg, bg) =>
   div().px(5).rounded(4).text_size(10.5).text_color(fg).bg(bg).flex_none().child(text);
 
 function itemRow(t, item, s, handlers) {
-  const current =
-    s.currentSpaces.has(`fleet.${item.uid}`) || s.currentSpaces.has(`fleet-view.${item.uid}`);
+  const current = Boolean(item.space) && s.currentSpaces.has(item.space);
   const markerColor = item.marker === "!" ? t.ansi1 : t.ansi3;
   const action = item.plan.action;
   return h_flex()
@@ -77,7 +76,7 @@ function itemRow(t, item, s, handlers) {
     .when(Boolean(item.outcome) && item.group === "paused", (el) =>
       el.child(badge(item.outcome, outcomeColor(t, item.outcome), t.raised)),
     )
-    .when(item.kind === "stream", (el) => el.child(badge("mux", t.dim, t.raised)))
+    .when(item.kind === "mux", (el) => el.child(badge("mux", t.dim, t.raised)))
     .when(action === "wake" && item.state !== "waking", (el) =>
       el.child(
         div()

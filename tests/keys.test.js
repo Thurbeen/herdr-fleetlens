@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { actionFor, HINTS } from "../mods/fleet-lens/keys.js";
+import { actionFor, commandAction, HINTS } from "../mods/fleet-lens/keys.js";
 
 test("the list keys match fleetlens, plus s for the herdr session", () => {
   const list = (k) => actionFor("list", k);
@@ -59,4 +59,14 @@ test("slash filters and o opens the row's link", () => {
 test("w wakes a paused session from the list or while reading it", () => {
   assert.equal(actionFor("list", "w"), "wake");
   assert.equal(actionFor("detail", "w"), "wake");
+});
+
+test("fleet-lens.<action> commands reach the same actions as the keys", () => {
+  assert.equal(commandAction("down"), "down");
+  assert.equal(commandAction("nextKind"), "nextKind");
+  assert.equal(commandAction("open"), "open");
+  assert.equal(commandAction("back"), "back");
+  assert.equal(commandAction("wake"), "wake");
+  assert.equal(commandAction("focus"), null);
+  assert.equal(commandAction("rm -rf"), null);
 });

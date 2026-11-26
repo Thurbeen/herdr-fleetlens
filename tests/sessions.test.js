@@ -23,11 +23,11 @@ test("a session is paused by its Paused condition or its session state", () => {
   assert.equal(isPaused(byState), true);
 });
 
-test("herdr hosts its own sessions; any other runtime is a stream to view", () => {
-  assert.equal(hostKind(task("busy-worker")), "herdr");
-  assert.equal(hostKind(task("mission-control")), "stream");
-  assert.equal(hostKind({ spec: { host: "herdr/local" }, status: {} }), "herdr");
-  assert.equal(hostKind({ status: {} }), "stream");
+test("herdr hosts its own sessions; a mux host is named as such; anything else is unknown", () => {
+  assert.equal(hostKind(task("busy-worker"), []), "herdr");
+  assert.equal(hostKind(task("mission-control"), []), "unknown");
+  assert.equal(hostKind({ spec: { host: "herdr/local" }, status: {} }, []), "herdr");
+  assert.equal(hostKind({ status: {} }, []), "unknown");
 });
 
 test("going to a session focuses a live herdr one and wakes a paused one of any runtime", () => {
@@ -98,4 +98,18 @@ test("every paused session is listed under Paused, finished ones with their outc
     groups.map((g) => [g.key, g.items.map((i) => [i.state, i.outcome])]),
     [["paused", [["paused", "shipped"]]]],
   );
+});
+
+test("a Task on the plain local host is a herdr session when a herdr terminal carries its id", () => {
+  const onLocal = structuredClone(task("mission-control"));
+  onLocal.status.session = { host: "local", id: "demo.u100-aaaa" };
+  const live = [
+    { address: "t3", status: "idle", state: "live", labels: { "fleet.key": "demo.u100-aaaa" } },
+  ];
+  assert.equal(hostKind(onLocal, live), "herdr");
+  assert.deepEqual(goPlan(onLocal, live), { action: "focus", terminal: "t3" });
+  assert.equal(hostKind(onLocal, []), "unknown");
+  assert.equal(hostKind({ status: { session: { host: "mux/box" } } }, []), "mux");
+  const [item] = sessionGroups([onLocal], live, new Set()).flatMap((g) => g.items);
+  assert.equal(item.kind, "herdr");
 });
